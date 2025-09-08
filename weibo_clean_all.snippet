@@ -1,0 +1,30 @@
+#!name=微博净化（个人主页+热搜+首页+发现页）
+#!desc=去掉微博个人主页无用入口，净化热搜广告、首页推广、发现页广告
+#!author=ChatGPT
+#!date=2025-09-08
+#!category=微博净化
+#!system=iOS
+#!icon=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/gif/naisi-01.gif
+
+[rewrite_local]
+# 个人主页
+^https:\/\/api\.weibo\.cn\/2\/profile\/me\? url script-response-body weibo_profile_clean
+
+# 热搜广告（page/flowpage）
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(page|flowpage)\? url script-response-body weibo_ads_clean
+
+# 首页推广（timeline）
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/(unread_)?friends(/|_)timeline url script-response-body weibo_ads_clean
+
+# 发现页广告（search/finder/container_discover）
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/search\/(finder|container_timeline|container_discover)\? url script-response-body weibo_ads_clean
+
+[script]
+# 个人主页净化
+weibo_profile_clean = type=http-response,pattern=^https:\/\/api\.weibo\.cn\/2\/profile\/me\?,requires-body=1,max-size=0,script-content=(()=>{let body=$response.body;if(body){try{let obj=JSON.parse(body);if(obj.items&&Array.isArray(obj.items)){obj.items=obj.items.filter(i=>{let id=i.itemId||"";return !(id.includes("mypay")||id.includes("pay")||id.includes("ordercenter")||id.includes("chaohua")||id.includes("productcenter")||id.includes("promote"));});}body=JSON.stringify(obj);}catch(e){console.log("Weibo profile filter error: "+e);}}$done({body});})()
+
+# 广告净化（热搜/首页/发现页通用）
+weibo_ads_clean = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(page|flowpage|statuses\/(unread_)?friends(/|_)timeline|search\/(finder|container_timeline|container_discover)\?),requires-body=1,max-size=0,script-content=(()=>{let body=$response.body;if(body){try{let obj=JSON.parse(body);if(obj.cards&&Array.isArray(obj.cards)){obj.cards=obj.cards.filter(c=>!c.mblog||!c.mblog.promotion);}if(obj.items&&Array.isArray(obj.items)){obj.items=obj.items.filter(i=>!(i.ad_state||i.mblog&&i.mblog.promotion));}body=JSON.stringify(obj);}catch(e){console.log("Weibo ads filter error: "+e);}}$done({body});})()
+
+[mitm]
+hostname = api.weibo.cn, mapi.weibo.com
