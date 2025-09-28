@@ -1,0 +1,13 @@
+#!name=追觅app删除底部按钮
+#!desc=删除追觅app底部产品、商城、探索按钮
+#!author=你的名字
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/8c/76/22/8c7622fd-3411-0f04-0f9e-093195d49fd3/AppIcon-0-0-1x_U007ephone-0-1-0-0-85-220.png/104x104bb.png
+#!homepage=https://github.com/rubbit3/qx
+#!update-interval=86400
+#!enabled=true
+
+[Rewrite]
+^https?:\/\/[^\/]+\/dreame-product\/public\/common-plugin(\/|\?|$) url script-response-body https://raw.githubusercontent.com/rubbit3/qx/main/patch_common_plugin.js
+
+[MITM]
+hostname = cn.iot.dreame.tech
