@@ -42,7 +42,7 @@
       // 替换 URL
       json.data.url = newUrl;
       // 将原始 md5 赋回；若原始 md5 不存在，则使用 fallbackNewMd5
-      json.data.md5 = origMd5 || fallbackNewMd5;
+      json.data.md5 = origMd5 ;
 
       console.log(`[patch_common_plugin] ${now()} - replaced data.url -> ${json.data.url}`);
       console.log(`[patch_common_plugin] ${now()} - set data.md5 -> ${json.data.md5} (orig: ${origMd5})`);
