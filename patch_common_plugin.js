@@ -1,61 +1,52 @@
-// patch_common_plugin.js (with debug logs, keep original md5 if exists)
-// 用法（QX rewrite_local）:
-// ^https?:\/\/[^\/]+\/dreame-product\/public\/common-plugin(\/|\?|$) url script-response-body https://raw.githubusercontent.com/<user>/<repo>/main/patch_common_plugin.js
-
+// patch_common_plugin.js (QX 兼容调试版)
 (function () {
   'use strict';
 
   function now() { return new Date().toISOString(); }
 
+  function log(msg) {
+    // QX 中 console.log 不一定显示，改用 $notify
+    if (typeof $notify === 'function') {
+      $notify('[patch_common_plugin]', now(), msg);
+    }
+  }
+
   try {
-    const reqUrl = (typeof $request !== 'undefined' && $request.url) ? $request.url : 'unknown-request-url';
-    const body = (typeof $response !== 'undefined' && $response.body) ? $response.body : null;
-
-    console.log(`[patch_common_plugin] ${now()} - script start. requestUrl: ${reqUrl}`);
-
+    const body = $response.body;
     if (!body) {
-      console.log(`[patch_common_plugin] ${now()} - empty response body, nothing to do.`);
+      log('empty response body, nothing to do.');
       $done({});
       return;
     }
 
     let json;
-    try {
-      json = JSON.parse(body);
-    } catch (err) {
-      console.log(`[patch_common_plugin] ${now()} - JSON parse error: ${err}. Returning original body.`);
+    try { json = JSON.parse(body); } 
+    catch (err) {
+      log('JSON parse error: ' + err);
       $done({});
       return;
     }
 
-    // 读取原始 data.url 与 data.md5（若存在）
-    const origUrl = json && json.data && json.data.url ? json.data.url : null;
-    const origMd5 = json && json.data && json.data.md5 ? json.data.md5 : null;
-    console.log(`[patch_common_plugin] ${now()} - original data.url: ${origUrl}`);
-    console.log(`[patch_common_plugin] ${now()} - original data.md5: ${origMd5}`);
+    const origUrl = json?.data?.url || null;
+    const origMd5 = json?.data?.md5 || null;
 
-    // 在这里设置你想注入的 URL；md5 将优先保留原始响应的值
+    log(`original data.url: ${origUrl}`);
+    log(`original data.md5: ${origMd5}`);
+
     const newUrl = 'https://raw.githubusercontent.com/shuntou/DREAME.Bottom/main/f3c3ed6090bbd787576ac97ef028cbe0___UNI__EDB922E.zip';
-    const fallbackNewMd5 = 'ffcba5b0072acb1f1c53aba76bb22100'; // 如果原始 md5 不存在就使用这个（可按需改）
 
-    if (json && typeof json === 'object' && json.data && typeof json.data === 'object') {
-      // 替换 URL
+    if (json?.data) {
       json.data.url = newUrl;
-      // 将原始 md5 赋回；若原始 md5 不存在，则使用 fallbackNewMd5
-      json.data.md5 = origMd5 ;
-
-      console.log(`[patch_common_plugin] ${now()} - replaced data.url -> ${json.data.url}`);
-      console.log(`[patch_common_plugin] ${now()} - set data.md5 -> ${json.data.md5} (orig: ${origMd5})`);
+      json.data.md5 = origMd5; // 保留原始 md5
+      log(`replaced data.url -> ${newUrl}`);
+      log(`set data.md5 -> ${json.data.md5}`);
     } else {
-      console.log(`[patch_common_plugin] ${now()} - response JSON has no .data field, skip modification.`);
-      $done({ body: JSON.stringify(json) });
-      return;
+      log('response JSON has no .data field, skip modification.');
     }
 
-    // 返回修改后的响应
     $done({ body: JSON.stringify(json) });
   } catch (e) {
-    console.log(`[patch_common_plugin] ${now()} - unexpected error: ${e}`);
+    log('unexpected error: ' + e);
     $done({});
   }
 })();
