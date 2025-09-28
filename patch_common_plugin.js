@@ -38,7 +38,7 @@
     if (json?.data) {
       json.data.url = newUrl;
       json.data.md5 = origMd5; // 保留原始 md5
-      json.data.message = '包括原来的md5';
+      json.data.status = '包括原来的md5';
       log(`replaced data.url -> ${newUrl}`);
       log(`set data.md5 -> ${json.data.md5}`);
     } else {
