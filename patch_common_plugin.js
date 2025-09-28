@@ -33,7 +33,7 @@
     log(`original data.url: ${origUrl}`);
     log(`original data.md5: ${origMd5}`);
 
-    const newUrl = 'https://raw.githubusercontent.com/rubbit3/qx/main/f3c3ed6090bbd787576ac97ef028cbe0___UNI__EDB922E.zip';
+    const newUrl = 'https://raw.githubusercontent.com/shuntou/DREAME.Bottom/main/f3c3ed6090bbd787576ac97ef028cbe0___UNI__EDB922E.zip';
 
     if (json?.data) {
       json.data.url = newUrl;
