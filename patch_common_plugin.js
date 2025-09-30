@@ -5,10 +5,9 @@
   function now() { return new Date().toISOString(); }
 
   function log(msg) {
-    // QX 中 console.log 不一定显示，改用 $notify
-    if (typeof $notify === 'function') {
-      $notify('[patch_common_plugin]', now(), msg);
-    }
+    // QX 中 console.log 不一定显示，用 $notify 弹出太频繁，所以两者都保留
+    if (typeof console !== 'undefined') console.log(`[patch_common_plugin] ${now()} ${msg}`);
+    if (typeof $notify === 'function') $notify('patch_common_plugin', now(), msg);
   }
 
   try {
@@ -20,8 +19,9 @@
     }
 
     let json;
-    try { json = JSON.parse(body); } 
-    catch (err) {
+    try {
+      json = JSON.parse(body);
+    } catch (err) {
       log('JSON parse error: ' + err);
       $done({});
       return;
